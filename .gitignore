@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.gemini/
+brain/
+venv/
+.env
+.ipynb_checkpoints/

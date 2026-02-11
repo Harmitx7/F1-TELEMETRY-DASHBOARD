@@ -1,0 +1,233 @@
+/* ============================================================================
+   F1 PRO MAX - SCI-FI FLUID DESIGN SYSTEM
+   ============================================================================ */
+
+:root {
+  /* --- 1. MOTION TOKENS --- */
+  --motion-hover: 300ms cubic-bezier(0.25, 0.8, 0.25, 1);
+  --motion-click: 150ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --motion-fluid: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Spring-like */
+
+  /* --- 2. NEON PALETTE --- */
+  --neon-cyan: #00F3FF;
+  --neon-cyan-dim: rgba(0, 243, 255, 0.2);
+  --neon-cyan-glow: rgba(0, 243, 255, 0.4);
+
+  --neon-red: #FF003C;
+  --neon-red-dim: rgba(255, 0, 60, 0.2);
+  --neon-red-glow: rgba(255, 0, 60, 0.4);
+
+  --neon-gold: #FFD700;
+  --neon-green: #00FF9D;
+
+  /* --- 3. SURFACES (GLASS) --- */
+  --void-bg: #050B14;
+  --glass-panel: rgba(20, 26, 35, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(0, 243, 255, 0.3);
+  --glass-blur: blur(12px);
+
+  /* --- 4. TYPOGRAPHY --- */
+  --font-header: 'Orbitron', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+}
+
+body {
+  background-color: var(--void-bg);
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(0, 243, 255, 0.05) 0%, transparent 60%),
+    linear-gradient(rgba(5, 11, 20, 0.95), rgba(5, 11, 20, 1));
+  font-family: var(--font-body);
+  color: #ffffff;
+}
+
+/* ============================================================================
+   GLASSMORPHISM CARDS (The "Container")
+   ============================================================================ */
+
+.dashboard-card {
+  background: var(--glass-panel);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  /* Safari */
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--motion-hover);
+}
+
+/* Fluid Hover with Glow */
+.dashboard-card:hover {
+  transform: translateY(-4px) scale(1.005);
+  border-color: var(--glass-border-hover);
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--neon-cyan-dim),
+    inset 0 0 20px rgba(0, 243, 255, 0.05);
+  /* Inner Glow */
+}
+
+/* Top Accent Line (Animated) */
+.dashboard-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+  opacity: 0.5;
+  transition: opacity var(--motion-hover);
+}
+
+.dashboard-card:hover::before {
+  opacity: 1;
+}
+
+.dashboard-card.no-hover:hover {
+  transform: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================================================
+   TEXT & HEADERS
+   ============================================================================ */
+
+.section-title {
+  font-family: var(--font-header);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #fff;
+  border-bottom: 1px solid var(--neon-red-dim);
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-title::after {
+  content: '';
+  flex-grow: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--neon-red), transparent);
+  margin-left: 10px;
+  opacity: 0.5;
+}
+
+/* Data Values */
+.metric-value {
+  font-family: var(--font-header);
+  font-weight: 700;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 20px var(--neon-cyan-glow);
+  transition: text-shadow 0.3s ease;
+}
+
+.metric-value:hover {
+  text-shadow: 0 0 40px var(--neon-cyan);
+}
+
+/* ============================================================================
+   BUTTONS (Sci-Fi Interactivity)
+   ============================================================================ */
+
+.button-primary {
+  background: rgba(255, 0, 60, 0.1);
+  border: 1px solid var(--neon-red);
+  color: var(--neon-red);
+  font-family: var(--font-header);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: all var(--motion-click);
+  box-shadow: 0 0 10px var(--neon-red-dim);
+}
+
+.button-primary:hover {
+  background: var(--neon-red);
+  color: #000;
+  box-shadow: 0 0 20px var(--neon-red-glow);
+  transform: translateY(-2px);
+}
+
+.button-primary:active {
+  transform: scale(0.95);
+}
+
+/* Toggle Switch Styling for Live Mode */
+.f1-toggle .visible-checkbox {
+  /* Custom checkbox styling if needed, but Dash wrapper limits this */
+}
+
+/* ============================================================================
+   PLOTLY CHART OVERRIDES (Dark Mode Integration)
+   ============================================================================ */
+.js-plotly-plot .plotly .modebar {
+  display: none !important;
+  /* Hide standardized menu */
+}
+
+/* ============================================================================
+   ICON UTILITIES
+   ============================================================================ */
+.icon-svg {
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+  transition: filter 0.3s ease;
+}
+
+.dashboard-card:hover .icon-svg {
+  filter: drop-shadow(0 0 8px var(--neon-cyan));
+}
+
+/* Header Animation */
+.f1-header {
+  background: transparent;
+  border-bottom: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+}
+
+/* Live Indicator Pulse */
+.live-indicator {
+  color: var(--neon-green);
+  font-family: var(--font-header);
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+}
+
+/* Table Enhancements */
+.dash-table-container th {
+  background: rgba(0, 0, 0, 0.8) !important;
+  border-bottom: 1px solid var(--neon-cyan) !important;
+  color: var(--neon-cyan) !important;
+  font-family: var(--font-header) !important;
+}
+
+.dash-table-container td {
+  background: transparent !important;
+  color: #fff !important;
+  font-family: var(--font-body) !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--void-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--neon-cyan-dim);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-cyan);
+}
