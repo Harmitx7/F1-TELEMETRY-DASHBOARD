@@ -5,7 +5,6 @@ Provides helper functions for track map generation and lap delta analysis
 
 import pandas as pd
 import numpy as np
-from scipy.interpolate import interp1d
 
 
 def compute_distance_along_lap(df):
@@ -130,15 +129,14 @@ def interpolate_lap_by_distance(lap_data, distance_grid=None, num_points=200):
     
     # Interpolate time as function of distance
     try:
-        time_interp = interp1d(
-            lap_data['dist_along_lap'], 
-            lap_data['time_stamp'],
-            kind='linear',
-            bounds_error=False,
-            fill_value='extrapolate'
+        # Use numpy.interp for linear interpolation instead of scipy
+        # np.interp(x, xp, fp) -> x=target_dist, xp=source_dist, fp=source_values
+        interpolated_time = np.interp(
+            distance_grid,
+            lap_data['dist_along_lap'].values,
+            lap_data['time_stamp'].values,
+            left=np.nan, right=np.nan # extrapolated values as NaN or handle borders
         )
-        
-        interpolated_time = time_interp(distance_grid)
         
         # Create result DataFrame
         result = pd.DataFrame({
@@ -149,14 +147,11 @@ def interpolate_lap_by_distance(lap_data, distance_grid=None, num_points=200):
         # Interpolate other columns if present
         for col in ['speed_kph', 'throttle_pct', 'brake_pct', 'rpm']:
             if col in lap_data.columns:
-                col_interp = interp1d(
-                    lap_data['dist_along_lap'],
-                    lap_data[col],
-                    kind='linear',
-                    bounds_error=False,
-                    fill_value='extrapolate'
+                result[col] = np.interp(
+                    distance_grid,
+                    lap_data['dist_along_lap'].values,
+                    lap_data[col].values
                 )
-                result[col] = col_interp(distance_grid)
         
         return result
     
