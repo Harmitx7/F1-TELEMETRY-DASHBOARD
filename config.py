@@ -64,37 +64,37 @@ class Config:
     # ============================================================================
     COLORS = {
         # Core backgrounds
-        'card_bg': '#141414',
-        'background': '#0d0d0d',
+        'card_bg': '#0b0f12',
+        'background': '#050505',
         
         # F1 Signature colors
-        'f1_red': '#e10600',
-        'f1_cyan': '#00d2be',
-        'f1_gold': '#f0c514',
+        'f1_red': '#d90429',
+        'f1_cyan': '#00e5ff',
+        'f1_gold': '#b7ff2a',
         
         # Text colors
-        'text_primary': '#ffffff',
-        'text_secondary': '#8a8a8a',
-        'text_accent': '#00d2be',
-        'text_muted': '#666666',
+        'text_primary': '#f4f7fa',
+        'text_secondary': '#a2acb8',
+        'text_accent': '#00e5ff',
+        'text_muted': '#68727d',
         
         # Chart colors
-        'grid_line': 'rgba(255, 255, 255, 0.05)',
-        'border': 'rgba(255, 255, 255, 0.08)',
+        'grid_line': 'rgba(255, 255, 255, 0.07)',
+        'border': 'rgba(255, 255, 255, 0.12)',
         
         # Data series colors - F1 team inspired
-        'series': ['#e10600', '#00d2be', '#f0c514', '#00ff87', '#ff4757'],
+        'series': ['#00e5ff', '#b7ff2a', '#ff335f', '#f5f7ff', '#ff8f00'],
         
         # Data state colors
-        'positive': '#00ff87',
-        'negative': '#ff4757',
-        'warning': '#ffa502',
+        'positive': '#b7ff2a',
+        'negative': '#ff335f',
+        'warning': '#ff8f00',
         
         # Table colors
-        'table_header': '#0d0d0d',
-        'table_row_even': '#141414',
-        'table_row_odd': '#1a1a1a',
-        'header_gradient_start': '#e10600',
+        'table_header': '#0a0c10',
+        'table_row_even': '#0f1318',
+        'table_row_odd': '#11171d',
+        'header_gradient_start': '#00e5ff',
     }
     
     # ============================================================================
@@ -102,21 +102,21 @@ class Config:
     # ============================================================================
     CARD_STYLE = {
         'backgroundColor': COLORS['card_bg'],
-        'borderRadius': '12px',
+        'borderRadius': '10px',
         'padding': '20px',
         'marginBottom': '20px',
         'border': f'1px solid {COLORS["border"]}',
-        'boxShadow': '0 4px 6px rgba(0, 0, 0, 0.3)',
+        'boxShadow': 'none',
     }
     
     SECTION_TITLE_STYLE = {
-        'fontSize': '16px',
+        'fontSize': '14px',
         'fontWeight': '700',
         'color': COLORS['text_primary'],
-        'letterSpacing': '0.08em',
+        'letterSpacing': '0.13em',
         'marginBottom': '15px',
         'textTransform': 'uppercase',
-        'borderBottom': f'2px solid {COLORS["header_gradient_start"]}',
+        'borderBottom': f'1px solid {COLORS["header_gradient_start"]}',
         'paddingBottom': '8px',
         'fontFamily': 'Orbitron, sans-serif',
     }
@@ -126,7 +126,7 @@ class Config:
         'fontWeight': '700',
         'color': COLORS['f1_cyan'],
         'fontFamily': 'Orbitron, sans-serif',
-        'textShadow': '0 0 30px rgba(0, 210, 190, 0.4)',
+        'textShadow': '0 0 16px rgba(0, 229, 255, 0.25)',
         'transition': 'text-shadow 0.3s ease',
     }
     
@@ -141,6 +141,7 @@ class Config:
     DROPDOWN_STYLE = {
         'backgroundColor': COLORS['card_bg'],
         'borderRadius': '6px',
+        'border': f'1px solid {COLORS["border"]}',
     }
     
     @classmethod

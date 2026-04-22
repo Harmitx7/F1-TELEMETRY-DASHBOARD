@@ -52,130 +52,71 @@ class F1PacketParser:
     @staticmethod
     def parse_car_telemetry(packet, player_index):
         """Parse Car Telemetry Data (ID 6)"""
-        # Header is 24 bytes (29 in 2024 spec, let's assume 2023 spec for MVP compatibility)
-        # But wait, header size varies by year. 
-        # F1 23 Header is 29 bytes. F1 22 is 24 bytes.
-        # Let's target F1 23/24 which uses 29 byte header.
-        
-        # Header size logic: F1 2024 uses 28/29 bytes? 
-        # We use dynamic calculation from F1PacketParser.parse_header's format.
-        header_fmt = '<HBBBBQfIIBB'
-        header_size = struct.calcsize(header_fmt)
-        
-        # Each car data is 60 bytes
-        # struct CarTelemetryData {
-        #    uint16 m_speed;                         // Speed of car in kilometres per hour
-        #    float m_throttle;                       // Amount of throttle applied (0.0 to 1.0)
-        #    float m_steer;                          // Steering (-1.0 (full lock left) to 1.0 (full lock right))
-        #    float m_brake;                          // Amount of brake applied (0.0 to 1.0)
-        #    uint8 m_clutch;                         // Amount of clutch applied (0 to 100)
-        #    int8 m_gear;                            // Gear selected (1-8, N=0, R=-1)
-        #    uint16 m_engineRPM;                     // Engine RPM
-        #    uint8 m_drs;                            // 0 = off, 1 = on
-        #    uint8 m_revLightsPercent;               // Rev lights indicator (percentage)
-        #    uint16 m_revLightsBitValue;             // Rev lights (bit 0 = leftmost LED, bit 14 = rightmost LED)
-        #    uint16 m_brakesTemperature[4];          // Brakes temperature (celsius)
-        #    uint8 m_tyresSurfaceTemperature[4];     // Tyres surface temperature (celsius)
-        #    uint8 m_tyresInnerTemperature[4];       // Tyres inner temperature (celsius)
-        #    uint16 m_engineTemperature;             // Engine temperature (celsius)
-        #    float m_tyresPressure[4];               // Tyres pressure (PSI)
-        #    uint8 m_surfaceType[4];                 // Driving surface type
-        # }
-        
-        # Correct Spec: H(Speed) fff(Throt,Steer,Brake) Bb(Clutch,Gear) H(RPM) BB(DRS,Rev) H(RevBit)
-        # HHHH(Brakes) BBBB(TyreSurf) BBBB(TyreInner) H(Engine) ffff(Press) BBBB(Surf)
-        car_data_fmt = '<HfffBbHBBHHHHHBBBBBBBBHffffBBBB'
-        car_data_size = struct.calcsize(car_data_fmt)
-        
-        offset = header_size + (player_index * car_data_size)
-        
-        if len(packet) < offset + car_data_size:
+        try:
+            header_fmt = '<HBBBBBQ fIIBB'
+            header_size = struct.calcsize(header_fmt)
+
+            car_data_fmt = '<HfffBbHBBHHHHHBBBBBBBBHffffBBBB'
+            car_data_size = struct.calcsize(car_data_fmt)
+
+            offset = header_size + (player_index * car_data_size)
+
+            if len(packet) < offset + car_data_size:
+                return None
+
+            data = struct.unpack(car_data_fmt, packet[offset:offset+car_data_size])
+
+            return {
+                'speed': data[0],
+                'throttle': data[1],
+                'steer': data[2],
+                'brake': data[3],
+                'clutch': data[4],
+                'gear': data[5],
+                'rpm': data[6],
+                'drs': data[7],
+                'rev_lights_percent': data[8],
+                'engine_temp': data[22],
+                'tyres_surface_temp': [data[14], data[15], data[16], data[17]]
+            }
+        except (struct.error, IndexError) as e:
+            logger.warning(f"Failed to parse car telemetry: {e}")
             return None
-            
-        data = struct.unpack(car_data_fmt, packet[offset:offset+car_data_size])
-        
-        # Data Indices:
-        # 0-9: Header-ish
-        # 10-13: Brakes
-        # 14-17: Tyre Surf
-        # 18-21: Tyre Inner
-        # 22: Engine
-        
-        return {
-            'speed': data[0],
-            'throttle': data[1],
-            'steer': data[2],
-            'brake': data[3],
-            'clutch': data[4],
-            'gear': data[5],
-            'rpm': data[6],
-            'drs': data[7],
-            'rev_lights_percent': data[8],
-            'engine_temp': data[22],
-            'tyres_surface_temp': [data[14], data[15], data[16], data[17]]
-        }
 
     @staticmethod
     def parse_lap_data(packet, player_index):
         """Parse Lap Data (ID 2)"""
-        header_fmt = '<HBBBBQfIIBB'
-        header_size = struct.calcsize(header_fmt)
-        
-        # struct LapData {
-        #    uint32 m_lastLapTimeInMS;               // Last lap time in milliseconds
-        #    uint32 m_currentLapTimeInMS;            // Current time around the lap in milliseconds
-        #    uint16 m_sector1TimeInMS;               // Sector 1 time in milliseconds
-        #    uint16 m_sector2TimeInMS;               // Sector 2 time in milliseconds
-        #    float m_lapDistance;                    // Distance vehicle is around current lap in metres
-        #    float m_totalDistance;                  // Total distance travelled in session in metres -- could be negative if we haven't crossed the line yet
-        #    float m_safetyCarDelta;                 // Delta in seconds for safety car
-        #    uint8 m_carPosition;                    // Car race position
-        #    uint8 m_currentLapNum;                  // Current lap number
-        #    uint8 m_pitStatus;                      // 0 = none, 1 = pitting, 2 = in pit area
-        #    uint8 m_numPitStops;                    // Number of pit stops taken in this session
-        #    uint8 m_sector;                         // 0 = sector1, 1 = sector2, 2 = sector3
-        #    uint8 m_currentLapInvalid;              // Current lap invalid - 0 = valid, 1 = invalid
-        #    uint8 m_penalties;                      // Accumulated time penalties in seconds to be added
-        #    uint8 m_warnings;                       // Accumulated number of warnings issued
-        #    uint8 m_numUnservedDriveThroughPens;    // Num drive through pens left to serve
-        #    uint8 m_numUnservedStopGoPens;          // Num stop go pens left to serve
-        #    uint8 m_gridPosition;                   // Grid position the vehicle started the race in
-        #    uint8 m_driverStatus;                   // Status of driver - 0 = in garage, 1 = flying lap, 2 = in lap, 3 = out lap, 4 = on track
-        #    uint8 m_resultStatus;                   // Result status - 0 = invalid, 1 = inactive, 2 = active, 3 = finished, 4 = didnotfinish, 5 = disqualified, 6 = not classified, 7 = retired
-        #    uint8 m_pitLaneTimerActive;             // Pit lane timing, 0 = inactive, 1 = active
-        #    uint16 m_pitLaneTimeInLaneInMS;         // If active, the current time spent in the pit lane in ms
-        #    uint16 m_pitStopTimerInMS;              // Time of the actual pit stop in ms
-        #    uint8 m_pitStopShouldServePen;          // Whether the car should serve a penalty at this stop
-        # }
-        
-        # Spec: II HH fff B(x14) HH B
-        # LastLap,CurLap,S1,S2,Dist,Tot,SC
-        # Pos,Lap,Pit,Stops,Sec,Inv,Pen,Warn,Drive,Stop,Grid,Driver,Result,PitActive (14)
-        # PitTime,StopTime,StopPen
-        lap_data_fmt = '<IIHHfffBBBBBBBBBBBBBBHHB'
-        lap_data_size = struct.calcsize(lap_data_fmt)
-        
-        offset = header_size + (player_index * lap_data_size)
-        
-        if len(packet) < offset + lap_data_size:
+        try:
+            header_fmt = '<HBBBBBQ fIIBB'
+            header_size = struct.calcsize(header_fmt)
+
+            lap_data_fmt = '<IIHHfffBBBBBBBBBBBBBBHHB'
+            lap_data_size = struct.calcsize(lap_data_fmt)
+
+            offset = header_size + (player_index * lap_data_size)
+
+            if len(packet) < offset + lap_data_size:
+                return None
+
+            data = struct.unpack(lap_data_fmt, packet[offset:offset+lap_data_size])
+
+            return {
+                'last_lap_time': data[0],
+                'current_lap_time': data[1],
+                'sector1_time': data[2],
+                'sector2_time': data[3],
+                'lap_distance': data[4],
+                'total_distance': data[5],
+                'car_position': data[7],
+                'current_lap': data[8],
+                'pit_status': data[9],
+                'sector': data[11],
+                'current_lap_invalid': data[12],
+                'penalties': data[13]
+            }
+        except (struct.error, IndexError) as e:
+            logger.warning(f"Failed to parse lap data: {e}")
             return None
-            
-        data = struct.unpack(lap_data_fmt, packet[offset:offset+lap_data_size])
-        
-        return {
-            'last_lap_time': data[0],
-            'current_lap_time': data[1],
-            'sector1_time': data[2],
-            'sector2_time': data[3],
-            'lap_distance': data[4],
-            'total_distance': data[5],
-            'car_position': data[7],
-            'current_lap': data[8],
-            'pit_status': data[9],
-            'sector': data[11],
-            'current_lap_invalid': data[12],
-            'penalties': data[13]
-        }
 
     @staticmethod
     def parse_session_data(packet):
@@ -276,3 +217,8 @@ class UdpListener(threading.Thread):
             
     def stop(self):
         self.running = False
+        # Unblock recvfrom by shutting down the socket
+        try:
+            self.sock.shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass  # Socket may already be closed

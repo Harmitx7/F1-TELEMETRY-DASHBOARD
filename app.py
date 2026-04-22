@@ -94,11 +94,19 @@ def get_dataset_summary(df):
     }
 
 
+# Maximum upload size: 50 MB
+MAX_UPLOAD_BYTES = 50 * 1024 * 1024
+
+
 def parse_upload_contents(contents, filename):
-    """Parse uploaded CSV file"""
+    """Parse uploaded CSV file with size validation"""
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
-    
+
+    # Security: enforce file size limit
+    if len(decoded) > MAX_UPLOAD_BYTES:
+        return None, f"File too large ({len(decoded) / (1024*1024):.1f} MB). Max is 50 MB."
+
     try:
         if 'csv' in filename.lower():
             df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
@@ -125,41 +133,40 @@ def load_default_data():
 # STYLING
 # ============================================================================
 
-# F1 Broadcast Theme Colors - Pro UI
-# F1 Broadcast Theme Colors - Pro UI
+# Carbon & Signal Theme Colors
 COLORS = {
     # Core backgrounds
-    'card_bg': '#141414',
-    'background': '#0d0d0d', # Used in layout
-    
-    # F1 Signature colors
-    'f1_red': '#e10600',
-    'f1_cyan': '#00d2be',
-    'f1_gold': '#f0c514',
-    
+    'card_bg': '#0b0f12',
+    'background': '#050505',
+
+    # Signal accents
+    'f1_red': '#d90429',
+    'f1_cyan': '#00e5ff',
+    'f1_gold': '#b7ff2a',  # Acid green signal used as tertiary accent
+
     # Text colors
-    'text_primary': '#ffffff',
-    'text_secondary': '#8a8a8a',
-    'text_accent': '#00d2be',
-    'text_muted': '#666666',
-    
+    'text_primary': '#f4f7fa',
+    'text_secondary': '#a2acb8',
+    'text_accent': '#00e5ff',
+    'text_muted': '#68727d',
+
     # Chart colors
-    'grid_line': 'rgba(255, 255, 255, 0.05)',
-    'border': 'rgba(255, 255, 255, 0.08)',
-    
-    # Data series colors - F1 team inspired
-    'series': ['#e10600', '#00d2be', '#f0c514', '#00ff87', '#ff4757'],
-    
+    'grid_line': 'rgba(255, 255, 255, 0.07)',
+    'border': 'rgba(255, 255, 255, 0.12)',
+
+    # Data series colors - Carbon & Signal
+    'series': ['#00e5ff', '#b7ff2a', '#ff335f', '#f5f7ff', '#ff8f00'],
+
     # Data state colors
-    'positive': '#00ff87',
-    'negative': '#ff4757',
-    'warning': '#ffa502',
-    
+    'positive': '#b7ff2a',
+    'negative': '#ff335f',
+    'warning': '#ff8f00',
+
     # Table colors
-    'table_header': '#0d0d0d',
-    'table_row_even': '#141414',
-    'table_row_odd': '#1a1a1a',
-    'header_gradient_start': '#e10600', # Kept for dynamic styling
+    'table_header': '#0a0c10',
+    'table_row_even': '#0f1318',
+    'table_row_odd': '#11171d',
+    'header_gradient_start': '#00e5ff',
 }
 
 # Custom CSS
@@ -171,7 +178,7 @@ app.index_string = '''
         <title>{%title%}</title>
         {%favicon%}
         {%css%}
-        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Orbitron:wght@500;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
         <style>
             * {
                 margin: 0;
@@ -180,9 +187,9 @@ app.index_string = '''
             }
             
             body {
-                font-family: 'Rajdhani', sans-serif;
-                background-color: #0d0d0d;
-                color: #ffffff;
+                font-family: 'Barlow Condensed', sans-serif;
+                background-color: #050505;
+                color: #f4f7fa;
                 margin: 0;
                 padding: 0;
                 -webkit-font-smoothing: antialiased;
@@ -192,71 +199,6 @@ app.index_string = '''
             #react-entry-point {
                 height: 100vh;
                 overflow-y: auto;
-            }
-            
-            /* Scrollbar styling */
-            ::-webkit-scrollbar {
-                width: 10px;
-                height: 10px;
-            }
-            
-            ::-webkit-scrollbar-track {
-                background: #141414;
-            }
-            
-            ::-webkit-scrollbar-thumb {
-                background: #2a2a2a;
-                border-radius: 5px;
-            }
-            
-            ::-webkit-scrollbar-thumb:hover {
-                background: #00d2be;
-            }
-            
-            /* Dropdown styling for visibility */
-            .Select-menu-outer {
-                background-color: #0c101c !important;
-                border: 1px solid #1c2840 !important;
-                border-radius: 6px !important;
-            }
-            
-            .Select-option {
-                background-color: #0c101c !important;
-                color: #ffffff !important;
-                padding: 10px !important;
-            }
-            
-            .Select-option:hover {
-                background-color: #151e31 !important;
-                color: #47d7ff !important;
-            }
-            
-            .Select-value-label {
-                color: #ffffff !important;
-            }
-            
-            /* Modern Dash dropdown styling */
-            div[class*="css-"] div[class*="menu"] {
-                background-color: #0c101c !important;
-                border: 1px solid #1c2840 !important;
-            }
-            
-            div[class*="css-"] div[class*="option"] {
-                background-color: #0c101c !important;
-                color: #ffffff !important;
-            }
-            
-            div[class*="css-"] div[class*="option"]:hover {
-                background-color: #151e31 !important;
-                color: #47d7ff !important;
-            }
-            
-            div[class*="css-"] div[class*="singleValue"] {
-                color: #ffffff !important;
-            }
-            
-            div[class*="css-"] div[class*="placeholder"] {
-                color: #9aa5c6 !important;
             }
         </style>
     </head>
@@ -274,11 +216,11 @@ app.index_string = '''
 # Common styles
 CARD_STYLE = {
     'backgroundColor': COLORS['card_bg'],
-    'borderRadius': '12px',
+    'borderRadius': '10px',
     'padding': '20px',
     'marginBottom': '20px',
     'border': f'1px solid {COLORS["border"]}',
-    'boxShadow': '0 4px 6px rgba(0, 0, 0, 0.3)',
+    'boxShadow': 'none',
 }
 
 def create_disabled_figure(title, message):
@@ -311,13 +253,13 @@ METRIC_STYLE = {
 }
 
 SECTION_TITLE_STYLE = {
-    'fontSize': '16px',
+    'fontSize': '14px',
     'fontWeight': '700',
     'color': COLORS['text_primary'],
-    'letterSpacing': '0.08em',
+    'letterSpacing': '0.13em',
     'marginBottom': '15px',
     'textTransform': 'uppercase',
-    'borderBottom': f'2px solid {COLORS["header_gradient_start"]}',
+    'borderBottom': f'1px solid {COLORS["header_gradient_start"]}',
     'paddingBottom': '8px',
     'fontFamily': 'Orbitron, sans-serif',
 }
@@ -327,7 +269,7 @@ METRIC_VALUE_STYLE = {
     'fontWeight': '700',
     'color': COLORS['f1_cyan'],
     'fontFamily': 'Orbitron, sans-serif',
-    'textShadow': '0 0 30px rgba(0, 210, 190, 0.4)',
+    'textShadow': '0 0 16px rgba(0, 229, 255, 0.25)',
     'transition': 'text-shadow 0.3s ease',
 }
 
@@ -342,6 +284,7 @@ METRIC_LABEL_STYLE = {
 DROPDOWN_STYLE = {
     'backgroundColor': COLORS['card_bg'],
     'borderRadius': '6px',
+    'border': f'1px solid {COLORS["border"]}',
 }
 
 DROPDOWN_CLASSNAME = 'custom-dropdown'
@@ -350,390 +293,370 @@ DROPDOWN_CLASSNAME = 'custom-dropdown'
 # LAYOUT
 # ============================================================================
 
-app.layout = html.Div(style={'backgroundColor': COLORS['background'], 'minHeight': '100vh', 'padding': '0'}, children=[
-    
-    
-    # Hidden data store
-    dcc.Store(id='stored-data', data=load_default_data()),
-    
-    # Header - F1 Broadcast Style
-    html.Div(className='f1-header', style={
-        'background': COLORS['background'],
-        'height': '100px',
-        'display': 'flex',
-        'alignItems': 'center',
-        'justifyContent': 'space-between',
-        'padding': '0 40px',
-        'marginBottom': '30px',
-        'borderBottom': f'3px solid {COLORS["f1_red"]}',
-        'position': 'relative',
-    }, children=[
-        # Left: Branding
-        html.Div(children=[
-            html.H1('F1 TELEMETRY', style={
-                'fontSize': '36px',
-                'fontWeight': '900',
-                'color': '#ffffff',
-                'margin': '0',
-                'fontFamily': 'Orbitron, sans-serif',
-                'letterSpacing': '0.15em',
-                'textShadow': '0 2px 10px rgba(0, 0, 0, 0.5)',
-            }),
-            html.P('REAL-TIME ANALYSIS', style={
-                'fontSize': '12px',
-                'color': COLORS['text_secondary'],
-                'margin': '4px 0 0 0',
-                'fontWeight': '600',
-                'letterSpacing': '0.2em',
-                'textTransform': 'uppercase',
-            }),
-        ]),
+app.layout = html.Div(
+    className='dashboard-shell',
+    style={'backgroundColor': COLORS['background'], 'minHeight': '100vh', 'padding': '0'},
+    children=[
+        dcc.Store(id='stored-data', data=load_default_data()),
 
-        # Animated gradient bar at bottom (via CSS)
-    ]),
-    
-    # Main container
-    html.Div(style={'padding': '0 30px 30px 30px', 'maxWidth': '1800px', 'margin': '0 auto'}, children=[
-        
-        # Top band: Upload + Summary + Lap Overview
-        html.Div(style={'display': 'grid', 'gridTemplateColumns': '32% 22% 46%', 'gap': '20px', 'marginBottom': '20px'}, children=[
-            
-            # Upload card
-            html.Div(style=CARD_STYLE, className='dashboard-card', children=[
-                html.Div('Upload & Summary', style=SECTION_TITLE_STYLE),
-                dcc.Upload(
-                    id='upload-data',
-                    children=html.Div([
-                        icons.get_icon('upload', size=48, color=COLORS['f1_red'], className='icon-svg'),
-                        html.Div('Drag and Drop or ', style={'fontSize': '14px', 'marginTop': '10px'}),
-                        html.A('Select CSV File', style={'color': COLORS['header_gradient_start'], 'fontWeight': '600'}),
-                    ], style={
-                        'textAlign': 'center',
-                        'padding': '40px',
-                        'border': f'2px dashed {COLORS["border"]}',
-                        'borderRadius': '8px',
-                        'cursor': 'pointer',
-                        'transition': 'all 0.3s ease',
-                    }),
-                    style={'marginBottom': '15px'},
-                    multiple=False
+        html.Header(className='f1-header reveal-up', children=[
+            html.Div(className='hero-copy', children=[
+                html.Div('Telemetry Operations Console', className='hero-kicker'),
+                html.H1('F1 Telemetry Command Grid', className='hero-title'),
+                html.P(
+                    'Prioritize trace comparison, isolate corner deltas, and validate pace with high-contrast signal clarity.',
+                    className='hero-subtitle'
                 ),
-                html.Div(id='upload-status', style={'fontSize': '13px', 'color': COLORS['text_secondary'], 'marginTop': '10px'}),
             ]),
-            
-            # Dataset summary metrics
-            html.Div(style=CARD_STYLE, className='dashboard-card', children=[
-                html.Div('Dataset Summary', style=SECTION_TITLE_STYLE),
-                html.Div(id='dataset-summary', children=[
-                    html.Div([
-                        html.Div('--', id='total-laps-value', style=METRIC_VALUE_STYLE),
-                        html.Div('Total Laps', style=METRIC_LABEL_STYLE),
-                    ], style=METRIC_STYLE),
-                    html.Div([
-                        html.Div('--', id='drivers-count-value', style=METRIC_VALUE_STYLE),
-                        html.Div('Drivers', style=METRIC_LABEL_STYLE),
-                    ], style=METRIC_STYLE),
-                    html.Div([
-                        html.Div('--', id='fastest-lap-value', style={**METRIC_VALUE_STYLE, 'fontSize': '14px'}),
-                        html.Div('Fastest Lap', style=METRIC_LABEL_STYLE),
-                    ], style=METRIC_STYLE),
+            html.Div(className='hero-side', children=[
+                html.Div(className='live-indicator', children=[
+                    html.Span(className='live-dot'),
+                    html.Span('LIVE SESSION LINK'),
                 ]),
-            ]),
-            
-            # Lap overview chart
-            html.Div(children=[
-                html.Div(style=CARD_STYLE, className='dashboard-card', children=[
-                html.Div('Lap Overview', style=SECTION_TITLE_STYLE),
-                    html.Div(className='chart-container', style={'height': '250px'}, children=[dcc.Graph(id='lap-times-chart', config={'displayModeBar': False})]),
-                ]),
-                html.Div(style=CARD_STYLE, className='dashboard-card', children=[
-                html.Div('Lap Times Table', style=SECTION_TITLE_STYLE),
-                    html.Div(id='lap-times-table-container'),
-                ]),
-            ]),
-        ]),
-        
-        # Data preview
-        html.Div(style=CARD_STYLE, className='dashboard-card', children=[
-            html.Div('Data Preview', style=SECTION_TITLE_STYLE),
-            html.Div(id='data-preview-container'),
-        ]),
-        
-        # Lap detail section
-        html.Div(style=CARD_STYLE, className='dashboard-card no-hover', children=[
-            html.Div('Lap Detail View', style=SECTION_TITLE_STYLE),
-            html.Div(style={'display': 'grid', 'gridTemplateColumns': '1fr 1fr', 'gap': '15px', 'marginBottom': '20px'}, children=[
-                html.Div([
-                    html.Label('Select Driver', style={'fontSize': '12px', 'color': COLORS['text_secondary'], 'marginBottom': '8px', 'display': 'block', 'fontWeight': '600'}),
-                    dcc.Dropdown(id='driver-select', className=DROPDOWN_CLASSNAME, placeholder='Select a driver...'),
-                ]),
-                html.Div([
-                    html.Label('Select Lap', style={'fontSize': '12px', 'color': COLORS['text_secondary'], 'marginBottom': '8px', 'display': 'block', 'fontWeight': '600'}),
-                    dcc.Dropdown(id='lap-select', className=DROPDOWN_CLASSNAME, placeholder='Select a lap...'),
-                ]),
-            ]),
-            html.Div(style={'display': 'grid', 'gridTemplateColumns': '1fr 1fr', 'gap': '15px'}, children=[
-                html.Div(className='chart-container', children=[dcc.Graph(id='speed-trace-chart', config={'displayModeBar': False})]),
-                html.Div(children=[
-                    html.Div(className='chart-container', style={'height': '180px'}, children=[dcc.Graph(id='throttle-trace-chart', config={'displayModeBar': False})]),
-                    html.Div(className='chart-container', style={'height': '180px'}, children=[dcc.Graph(id='brake-trace-chart', config={'displayModeBar': False})]),
-                ]),
-            ]),
-            html.Div(className='chart-container', children=[dcc.Graph(id='rpm-trace-chart', config={'displayModeBar': False})]),
-        ]),
-        
-        # Bottom band: Lap comparison + Insights
-        html.Div(style={'display': 'grid', 'gridTemplateColumns': '60% 40%', 'gap': '20px'}, children=[
-            
-            # Lap comparison
-            html.Div(style=CARD_STYLE, className='dashboard-card no-hover', children=[
-                html.Div('Lap Comparison', style=SECTION_TITLE_STYLE),
-                html.Div(style={'display': 'flex', 'gap': '15px', 'marginBottom': '25px', 'alignItems': 'flex-end'}, children=[
-                    html.Div(style={'flex': '1'}, children=[
-                        html.Label('Driver', style={'fontSize': '12px', 'color': COLORS['text_secondary'], 'marginBottom': '8px', 'display': 'block', 'fontWeight': '600'}),
-                        dcc.Dropdown(id='comparison-driver-select', className=DROPDOWN_CLASSNAME, placeholder='Select driver...'),
+                html.Div(className='hero-signal-grid', children=[
+                    html.Div(className='hero-signal-card', children=[
+                        html.Div('Primary Signal', className='hero-signal-label'),
+                        html.Div('F1 CYAN', className='hero-signal-value'),
                     ]),
-                    html.Div(style={'flex': '1'}, children=[
-                        html.Label('Lap A', style={'fontSize': '12px', 'color': COLORS['text_secondary'], 'marginBottom': '8px', 'display': 'block', 'fontWeight': '600'}),
-                        dcc.Dropdown(id='lap-a-select', className=DROPDOWN_CLASSNAME, placeholder='Select lap A...'),
+                    html.Div(className='hero-signal-card', children=[
+                        html.Div('Mode', className='hero-signal-label'),
+                        html.Div('TRACE COMPARE', className='hero-signal-value'),
                     ]),
-                    html.Div(style={'flex': '1'}, children=[
-                        html.Label('Lap B', style={'fontSize': '12px', 'color': COLORS['text_secondary'], 'marginBottom': '8px', 'display': 'block', 'fontWeight': '600'}),
-                        dcc.Dropdown(id='lap-b-select', className=DROPDOWN_CLASSNAME, placeholder='Select lap B...'),
-                    ]),
-                ]),
-                html.Div(className='chart-container', style={'height': '450px'}, children=[dcc.Graph(id='lap-comparison-chart', config={'displayModeBar': False})]),
-            ]),
-            
-            # Insights and sectors
-            html.Div(children=[
-                html.Div(style=CARD_STYLE, className='dashboard-card', children=[
-                    html.Div('Session Insights', style=SECTION_TITLE_STYLE),
-                    html.Div(id='insights-content'),
-                ]),
-                html.Div(style=CARD_STYLE, className='dashboard-card', children=[
-                    html.Div('Sector Heatmap', style=SECTION_TITLE_STYLE),
-                    html.Div(className='chart-container', style={'height': '250px'}, children=[dcc.Graph(id='sector-heatmap', config={'displayModeBar': False})]),
-                ]),
-            ]),
-        ]),
-        
-        # Track Map & Lap Delta Analysis Section
-        html.Div(style=CARD_STYLE, className='dashboard-card no-hover', children=[
-            html.Div('Track Map & Lap Delta Analysis', style=SECTION_TITLE_STYLE),
-            html.Div(style={'display': 'grid', 'gridTemplateColumns': '60% 40%', 'gap': '20px'}, children=[
-                
-                # Track Map Section
-                html.Div(children=[
-                    html.Div(style={'marginBottom': '15px'}, children=[
-                        html.Label('Track Map Controls', style={'fontSize': '12px', 'color': COLORS['text_secondary'], 'marginBottom': '8px', 'display': 'block', 'fontWeight': '600'}),
-                        html.Div(style={'display': 'flex', 'gap': '10px', 'alignItems': 'center'}, children=[
-                            html.Button([icons.get_icon('play', size=16), ' Play'], id='animation-play-btn', className='button-primary', n_clicks=0, style={
-                                'color': '#ffffff',
-                                'border': 'none',
-                                'padding': '8px 16px',
-                                'borderRadius': '6px',
-                                'cursor': 'pointer',
-                                'fontSize': '12px',
-                                'fontWeight': '600',
-                                'display': 'flex', 'alignItems': 'center', 'gap': '6px'
-                            }),
-                            html.Button([icons.get_icon('pause', size=16), ' Pause'], id='animation-pause-btn', className='button-secondary', n_clicks=0, style={
-                                'color': COLORS['text_primary'],
-                                'border': f'1px solid {COLORS["border"]}',
-                                'padding': '8px 16px',
-                                'borderRadius': '6px',
-                                'cursor': 'pointer',
-                                'fontSize': '12px',
-                                'fontWeight': '600',
-                                'display': 'flex', 'alignItems': 'center', 'gap': '6px'
-                            }),
-                        ]),
-                    ]),
-                    html.Div(className='chart-container', style={'height': '500px'}, children=[dcc.Graph(id='track-map-chart', config={'displayModeBar': False})]),
-                    html.Div(style={'marginTop': '15px'}, children=[
-                        html.Label('Distance Along Lap', style={'fontSize': '11px', 'color': COLORS['text_secondary'], 'marginBottom': '8px', 'display': 'block'}),
-                        dcc.Slider(
-                            id='distance-slider',
-                            min=0,
-                            max=100,
-                            value=0,
-                            marks={i: f'{i}%' for i in range(0, 101, 20)},
-                            tooltip={'placement': 'bottom', 'always_visible': False},
-                            updatemode='drag'
-                        ),
-                    ]),
-                    dcc.Interval(id='animation-interval', interval=100, disabled=True, n_intervals=0),
-                ]),
-                
-                # Lap Delta Section
-                html.Div(children=[
-                    html.Div(style={'marginBottom': '15px'}, children=[
-                        html.Label('Lap Delta Analysis', style={'fontSize': '12px', 'color': COLORS['text_secondary'], 'marginBottom': '8px', 'display': 'block', 'fontWeight': '600'}),
-                        html.Div(style={'display': 'grid', 'gridTemplateColumns': '1fr 1fr', 'gap': '10px'}, children=[
-                            html.Div([
-                                html.Label('Reference Lap', style={'fontSize': '11px', 'color': COLORS['text_secondary'], 'marginBottom': '5px', 'display': 'block'}),
-                                dcc.Dropdown(id='delta-lap-a-select', className=DROPDOWN_CLASSNAME, placeholder='Lap A...'),
-                            ]),
-                            html.Div([
-                                html.Label('Compare Lap', style={'fontSize': '11px', 'color': COLORS['text_secondary'], 'marginBottom': '5px', 'display': 'block'}),
-                                dcc.Dropdown(id='delta-lap-b-select', className=DROPDOWN_CLASSNAME, placeholder='Lap B...'),
-                            ]),
-                        ]),
-                    ]),
-                    html.Div(className='chart-container', style={'height': '300px'}, children=[dcc.Graph(id='delta-plot-chart', config={'displayModeBar': False})]),
-                    html.Div(id='corner-stats-card', style={'marginTop': '15px'}),
-                    html.Div(id='delta-summary-card', style={'marginTop': '15px'}),
                 ]),
             ]),
         ]),
 
-        # ================================================================
-        # 📊 ANALYTICS LAB — Data Science Widgets
-        # ================================================================
-        html.Div(style={'marginTop': '40px', 'marginBottom': '50px'}, children=[
-            
-            # Section Header
-            html.Div(style={
-                'display': 'flex', 'alignItems': 'center', 'justifyContent': 'space-between',
-                'marginBottom': '30px', 'paddingBottom': '15px',
-                'borderBottom': f'2px solid {COLORS["f1_cyan"]}',
-            }, children=[
-                html.Div(style={'display': 'flex', 'alignItems': 'center', 'gap': '15px'}, children=[
-                    html.H2('📊 ANALYTICS LAB', style={
-                        'fontFamily': 'Orbitron, sans-serif', 'fontSize': '24px',
-                        'fontWeight': '700', 'color': COLORS['f1_cyan'],
-                        'letterSpacing': '0.1em', 'margin': '0',
-                    }),
-                    html.Span('ADVANCED TELEMETRY ANALYSIS', style={
-                        'fontSize': '12px', 'color': COLORS['text_secondary'],
-                        'letterSpacing': '0.2em', 'textTransform': 'uppercase',
-                        'fontWeight': '600', 'marginTop': '4px',
-                        'borderLeft': f'1px solid {COLORS["border"]}',
-                        'paddingLeft': '15px'
-                    }),
-                ]),
-                html.Div(style={'fontSize': '11px', 'color': COLORS['text_muted'], 'fontStyle': 'italic'}, 
-                         children='Statistical insights derived from full session data')
-            ]),
-
-            # Row 1: Correlation Heatmap + Consistency Metrics
-            html.Div(style={'display': 'grid', 'gridTemplateColumns': '50% 50%', 'gap': '20px', 'marginBottom': '20px'}, children=[
-
-                # Correlation Heatmap
-                html.Div(style=CARD_STYLE, className='dashboard-card', children=[
-                    html.Div('Telemetry Correlation Matrix', style=SECTION_TITLE_STYLE),
-                    html.P('Pearson correlation between telemetry channels', style={
-                        'fontSize': '11px', 'color': COLORS['text_muted'], 'marginBottom': '15px',
-                    }),
-                    html.Div(
-                        className='chart-container', style={'height': '380px'},
-                        children=[dcc.Graph(id='correlation-heatmap', config={'displayModeBar': False})],
-                    ),
-                ]),
-
-                # Consistency Metrics
-                html.Div(style=CARD_STYLE, className='dashboard-card', children=[
-                    html.Div('Driver Consistency Analysis', style=SECTION_TITLE_STYLE),
-                    html.P('Lap-time variability per driver (lower CoV = more consistent)', style={
-                        'fontSize': '11px', 'color': COLORS['text_muted'], 'marginBottom': '15px',
-                    }),
-                    html.Div(id='consistency-metric-cards', style={
-                        'display': 'flex', 'gap': '12px', 'marginBottom': '18px', 'flexWrap': 'wrap',
-                    }),
-                    html.Div(
-                        className='chart-container', style={'height': '280px'},
-                        children=[dcc.Graph(id='consistency-chart', config={'displayModeBar': False})],
-                    ),
-                ]),
-            ]),
-
-            # Row 2: Performance Distribution (full width)
-            html.Div(style=CARD_STYLE, className='dashboard-card no-hover', children=[
-                html.Div(style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'marginBottom': '15px'}, children=[
-                    html.Div(children=[
-                        html.Div('Performance Distributions', style=SECTION_TITLE_STYLE),
-                        html.P('Per-driver distribution of telemetry metrics (violin + box)', style={
-                            'fontSize': '11px', 'color': COLORS['text_muted'], 'marginTop': '4px',
-                        }),
-                    ]),
-                    html.Div(style={'width': '200px'}, children=[
-                        html.Label('Metric', style={
-                            'fontSize': '11px', 'color': COLORS['text_secondary'],
-                            'display': 'block', 'marginBottom': '5px', 'fontWeight': '600',
-                        }),
-                        dcc.Dropdown(
-                            id='distribution-column-select',
-                            options=[{'label': c.replace('_', ' ').title(), 'value': c} for c in NUMERIC_TELEMETRY_COLS],
-                            value='speed_kph',
-                            clearable=False,
-                            style={'backgroundColor': COLORS['card_bg']},
-                        ),
-                    ]),
-                ]),
+        html.Div(
+            className='dashboard-main',
+            style={'padding': '0 30px 36px 30px', 'maxWidth': '1800px', 'margin': '0 auto'},
+            children=[
                 html.Div(
-                    className='chart-container', style={'height': '400px'},
-                    children=[dcc.Graph(id='distribution-chart', config={'displayModeBar': False})],
+                    className='top-band-grid reveal-up',
+                    style={'display': 'grid', 'gridTemplateColumns': '30% 20% 50%', 'gap': '20px', 'marginBottom': '20px'},
+                    children=[
+                        html.Div(style=CARD_STYLE, className='dashboard-card', children=[
+                            html.Div('Upload & Summary', style=SECTION_TITLE_STYLE),
+                            dcc.Upload(
+                                id='upload-data',
+                                children=html.Div([
+                                    icons.get_icon('upload', size=48, color=COLORS['f1_cyan'], className='icon-svg'),
+                                    html.Div('Drag and Drop or ', style={'fontSize': '14px', 'marginTop': '10px'}),
+                                    html.A('Select CSV File', style={'color': COLORS['header_gradient_start'], 'fontWeight': '600'}),
+                                ], className='upload-drop-zone', style={
+                                    'textAlign': 'center',
+                                    'padding': '40px',
+                                    'border': f'2px dashed {COLORS["border"]}',
+                                    'borderRadius': '8px',
+                                    'cursor': 'pointer',
+                                    'transition': 'all 0.2s ease',
+                                }),
+                                style={'marginBottom': '15px'},
+                                multiple=False
+                            ),
+                            html.Div(id='upload-status', style={'fontSize': '13px', 'color': COLORS['text_secondary'], 'marginTop': '10px'}),
+                        ]),
+
+                        html.Div(style=CARD_STYLE, className='dashboard-card', children=[
+                            html.Div('Dataset Summary', style=SECTION_TITLE_STYLE),
+                            html.Div(id='dataset-summary', children=[
+                                html.Div([
+                                    html.Div('--', id='total-laps-value', style=METRIC_VALUE_STYLE),
+                                    html.Div('Total Laps', style=METRIC_LABEL_STYLE),
+                                ], style=METRIC_STYLE),
+                                html.Div([
+                                    html.Div('--', id='drivers-count-value', style=METRIC_VALUE_STYLE),
+                                    html.Div('Drivers', style=METRIC_LABEL_STYLE),
+                                ], style=METRIC_STYLE),
+                                html.Div([
+                                    html.Div('--', id='fastest-lap-value', style={**METRIC_VALUE_STYLE, 'fontSize': '14px'}),
+                                    html.Div('Fastest Lap', style=METRIC_LABEL_STYLE),
+                                ], style=METRIC_STYLE),
+                            ]),
+                        ]),
+
+                        html.Div(className='lap-overview-stack', children=[
+                            html.Div(style=CARD_STYLE, className='dashboard-card', children=[
+                                html.Div('Lap Overview', style=SECTION_TITLE_STYLE),
+                                html.Div(
+                                    className='chart-container',
+                                    style={'height': '250px'},
+                                    children=[dcc.Graph(id='lap-times-chart', config={'displayModeBar': False})]
+                                ),
+                            ]),
+                            html.Div(style=CARD_STYLE, className='dashboard-card', children=[
+                                html.Div('Lap Times Table', style=SECTION_TITLE_STYLE),
+                                html.Div(id='lap-times-table-container'),
+                            ]),
+                        ]),
+                    ]
                 ),
-            ]),
 
-            # Row 3: Rolling Stats + Percentile Radar
-            html.Div(style={'display': 'grid', 'gridTemplateColumns': '60% 40%', 'gap': '20px', 'marginBottom': '20px'}, children=[
+                html.Div(style=CARD_STYLE, className='dashboard-card no-hover trace-priority-card reveal-up', children=[
+                    html.Div('Lap Detail View', style=SECTION_TITLE_STYLE),
+                    html.Div(
+                        className='control-grid',
+                        style={'display': 'grid', 'gridTemplateColumns': '1fr 1fr', 'gap': '15px', 'marginBottom': '20px'},
+                        children=[
+                            html.Div([
+                                html.Label('Select Driver', style={'fontSize': '12px', 'color': COLORS['text_secondary'], 'marginBottom': '8px', 'display': 'block', 'fontWeight': '600'}),
+                                dcc.Dropdown(id='driver-select', className=DROPDOWN_CLASSNAME, placeholder='Select a driver...'),
+                            ]),
+                            html.Div([
+                                html.Label('Select Lap', style={'fontSize': '12px', 'color': COLORS['text_secondary'], 'marginBottom': '8px', 'display': 'block', 'fontWeight': '600'}),
+                                dcc.Dropdown(id='lap-select', className=DROPDOWN_CLASSNAME, placeholder='Select a lap...'),
+                            ]),
+                        ]
+                    ),
+                    html.Div(
+                        className='trace-grid',
+                        style={'display': 'grid', 'gridTemplateColumns': '1.35fr 0.65fr', 'gap': '15px'},
+                        children=[
+                            html.Div(className='chart-container trace-main', children=[dcc.Graph(id='speed-trace-chart', config={'displayModeBar': False})]),
+                            html.Div(children=[
+                                html.Div(className='chart-container', style={'height': '190px'}, children=[dcc.Graph(id='throttle-trace-chart', config={'displayModeBar': False})]),
+                                html.Div(className='chart-container', style={'height': '190px'}, children=[dcc.Graph(id='brake-trace-chart', config={'displayModeBar': False})]),
+                            ]),
+                        ]
+                    ),
+                    html.Div(className='chart-container', children=[dcc.Graph(id='rpm-trace-chart', config={'displayModeBar': False})]),
+                ]),
 
-                # Rolling Stats
-                html.Div(style=CARD_STYLE, className='dashboard-card', children=[
-                    html.Div(style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'marginBottom': '15px'}, children=[
+                html.Div(style=CARD_STYLE, className='dashboard-card reveal-up', children=[
+                    html.Div('Data Preview', style=SECTION_TITLE_STYLE),
+                    html.Div(id='data-preview-container'),
+                ]),
+
+                html.Div(
+                    className='comparison-band reveal-up',
+                    style={'display': 'grid', 'gridTemplateColumns': '58% 42%', 'gap': '20px'},
+                    children=[
+                        html.Div(style=CARD_STYLE, className='dashboard-card no-hover', children=[
+                            html.Div('Lap Comparison', style=SECTION_TITLE_STYLE),
+                            html.Div(style={'display': 'flex', 'gap': '15px', 'marginBottom': '25px', 'alignItems': 'flex-end'}, children=[
+                                html.Div(style={'flex': '1'}, children=[
+                                    html.Label('Driver', style={'fontSize': '12px', 'color': COLORS['text_secondary'], 'marginBottom': '8px', 'display': 'block', 'fontWeight': '600'}),
+                                    dcc.Dropdown(id='comparison-driver-select', className=DROPDOWN_CLASSNAME, placeholder='Select driver...'),
+                                ]),
+                                html.Div(style={'flex': '1'}, children=[
+                                    html.Label('Lap A', style={'fontSize': '12px', 'color': COLORS['text_secondary'], 'marginBottom': '8px', 'display': 'block', 'fontWeight': '600'}),
+                                    dcc.Dropdown(id='lap-a-select', className=DROPDOWN_CLASSNAME, placeholder='Select lap A...'),
+                                ]),
+                                html.Div(style={'flex': '1'}, children=[
+                                    html.Label('Lap B', style={'fontSize': '12px', 'color': COLORS['text_secondary'], 'marginBottom': '8px', 'display': 'block', 'fontWeight': '600'}),
+                                    dcc.Dropdown(id='lap-b-select', className=DROPDOWN_CLASSNAME, placeholder='Select lap B...'),
+                                ]),
+                            ]),
+                            html.Div(className='chart-container', style={'height': '450px'}, children=[dcc.Graph(id='lap-comparison-chart', config={'displayModeBar': False})]),
+                        ]),
+
                         html.Div(children=[
-                            html.Div('Rolling Averages', style=SECTION_TITLE_STYLE),
-                            html.P('Moving-window smoothing of telemetry traces', style={
-                                'fontSize': '11px', 'color': COLORS['text_muted'], 'marginTop': '4px',
+                            html.Div(style=CARD_STYLE, className='dashboard-card', children=[
+                                html.Div('Session Insights', style=SECTION_TITLE_STYLE),
+                                html.Div(id='insights-content'),
+                            ]),
+                            html.Div(style=CARD_STYLE, className='dashboard-card', children=[
+                                html.Div('Sector Heatmap', style=SECTION_TITLE_STYLE),
+                                html.Div(className='chart-container', style={'height': '250px'}, children=[dcc.Graph(id='sector-heatmap', config={'displayModeBar': False})]),
+                            ]),
+                        ]),
+                    ]
+                ),
+
+                html.Div(style=CARD_STYLE, className='dashboard-card no-hover reveal-up', children=[
+                    html.Div('Track Map & Lap Delta Analysis', style=SECTION_TITLE_STYLE),
+                    html.Div(style={'display': 'grid', 'gridTemplateColumns': '62% 38%', 'gap': '20px'}, children=[
+                        html.Div(children=[
+                            html.Div(style={'marginBottom': '15px'}, children=[
+                                html.Label('Track Map Controls', style={'fontSize': '12px', 'color': COLORS['text_secondary'], 'marginBottom': '8px', 'display': 'block', 'fontWeight': '600'}),
+                                html.Div(style={'display': 'flex', 'gap': '10px', 'alignItems': 'center'}, children=[
+                                    html.Button(
+                                        [icons.get_icon('play', size=16), ' Play'],
+                                        id='animation-play-btn',
+                                        className='button-primary',
+                                        n_clicks=0,
+                                        style={'display': 'flex', 'alignItems': 'center', 'gap': '6px'}
+                                    ),
+                                    html.Button(
+                                        [icons.get_icon('pause', size=16), ' Pause'],
+                                        id='animation-pause-btn',
+                                        className='button-secondary',
+                                        n_clicks=0,
+                                        style={'display': 'flex', 'alignItems': 'center', 'gap': '6px'}
+                                    ),
+                                ]),
+                            ]),
+                            html.Div(className='chart-container', style={'height': '500px'}, children=[dcc.Graph(id='track-map-chart', config={'displayModeBar': False})]),
+                            html.Div(style={'marginTop': '15px'}, children=[
+                                html.Label('Distance Along Lap', style={'fontSize': '11px', 'color': COLORS['text_secondary'], 'marginBottom': '8px', 'display': 'block'}),
+                                dcc.Slider(
+                                    id='distance-slider',
+                                    min=0,
+                                    max=100,
+                                    value=0,
+                                    marks={i: f'{i}%' for i in range(0, 101, 20)},
+                                    tooltip={'placement': 'bottom', 'always_visible': False},
+                                    updatemode='drag'
+                                ),
+                            ]),
+                            dcc.Interval(id='animation-interval', interval=100, disabled=True, n_intervals=0),
+                        ]),
+
+                        html.Div(children=[
+                            html.Div(style={'marginBottom': '15px'}, children=[
+                                html.Label('Lap Delta Analysis', style={'fontSize': '12px', 'color': COLORS['text_secondary'], 'marginBottom': '8px', 'display': 'block', 'fontWeight': '600'}),
+                                html.Div(style={'display': 'grid', 'gridTemplateColumns': '1fr 1fr', 'gap': '10px'}, children=[
+                                    html.Div([
+                                        html.Label('Reference Lap', style={'fontSize': '11px', 'color': COLORS['text_secondary'], 'marginBottom': '5px', 'display': 'block'}),
+                                        dcc.Dropdown(id='delta-lap-a-select', className=DROPDOWN_CLASSNAME, placeholder='Lap A...'),
+                                    ]),
+                                    html.Div([
+                                        html.Label('Compare Lap', style={'fontSize': '11px', 'color': COLORS['text_secondary'], 'marginBottom': '5px', 'display': 'block'}),
+                                        dcc.Dropdown(id='delta-lap-b-select', className=DROPDOWN_CLASSNAME, placeholder='Lap B...'),
+                                    ]),
+                                ]),
+                            ]),
+                            html.Div(className='chart-container', style={'height': '300px'}, children=[dcc.Graph(id='delta-plot-chart', config={'displayModeBar': False})]),
+                            html.Div(id='corner-stats-card', style={'marginTop': '15px'}),
+                            html.Div(id='delta-summary-card', style={'marginTop': '15px'}),
+                        ]),
+                    ]),
+                ]),
+
+                html.Div(className='analytics-lab reveal-up', style={'marginTop': '40px', 'marginBottom': '50px'}, children=[
+                    html.Div(style={
+                        'display': 'flex', 'alignItems': 'center', 'justifyContent': 'space-between',
+                        'marginBottom': '30px', 'paddingBottom': '15px',
+                        'borderBottom': f'1px solid {COLORS["f1_cyan"]}',
+                    }, children=[
+                        html.Div(style={'display': 'flex', 'alignItems': 'center', 'gap': '15px'}, children=[
+                            html.H2('ANALYTICS LAB', style={
+                                'fontFamily': 'Orbitron, sans-serif', 'fontSize': '24px',
+                                'fontWeight': '700', 'color': COLORS['f1_cyan'],
+                                'letterSpacing': '0.1em', 'margin': '0',
+                            }),
+                            html.Span('ADVANCED TELEMETRY ANALYSIS', style={
+                                'fontSize': '12px', 'color': COLORS['text_secondary'],
+                                'letterSpacing': '0.2em', 'textTransform': 'uppercase',
+                                'fontWeight': '600', 'marginTop': '4px',
+                                'borderLeft': f'1px solid {COLORS["border"]}',
+                                'paddingLeft': '15px'
                             }),
                         ]),
-                        html.Div(style={'width': '150px'}, children=[
-                            html.Label('Window Size', style={
-                                'fontSize': '11px', 'color': COLORS['text_secondary'],
-                                'display': 'block', 'marginBottom': '5px', 'fontWeight': '600',
+                        html.Div(style={'fontSize': '11px', 'color': COLORS['text_muted'], 'fontStyle': 'italic'},
+                                 children='Statistical insights derived from full session data')
+                    ]),
+
+                    html.Div(style={'display': 'grid', 'gridTemplateColumns': '50% 50%', 'gap': '20px', 'marginBottom': '20px'}, children=[
+                        html.Div(style=CARD_STYLE, className='dashboard-card', children=[
+                            html.Div('Telemetry Correlation Matrix', style=SECTION_TITLE_STYLE),
+                            html.P('Pearson correlation between telemetry channels', style={
+                                'fontSize': '11px', 'color': COLORS['text_muted'], 'marginBottom': '15px',
                             }),
-                            dcc.Slider(
-                                id='rolling-window-slider', min=5, max=50, step=5,
-                                value=20, marks={5: '5', 20: '20', 50: '50'},
-                                tooltip={'placement': 'bottom'},
+                            html.Div(
+                                className='chart-container', style={'height': '380px'},
+                                children=[dcc.Graph(id='correlation-heatmap', config={'displayModeBar': False})],
+                            ),
+                        ]),
+
+                        html.Div(style=CARD_STYLE, className='dashboard-card', children=[
+                            html.Div('Driver Consistency Analysis', style=SECTION_TITLE_STYLE),
+                            html.P('Lap-time variability per driver (lower CoV = more consistent)', style={
+                                'fontSize': '11px', 'color': COLORS['text_muted'], 'marginBottom': '15px',
+                            }),
+                            html.Div(id='consistency-metric-cards', style={
+                                'display': 'flex', 'gap': '12px', 'marginBottom': '18px', 'flexWrap': 'wrap',
+                            }),
+                            html.Div(
+                                className='chart-container', style={'height': '280px'},
+                                children=[dcc.Graph(id='consistency-chart', config={'displayModeBar': False})],
                             ),
                         ]),
                     ]),
-                    html.Div(
-                        className='chart-container', style={'height': '380px'},
-                        children=[dcc.Graph(id='rolling-stats-chart', config={'displayModeBar': False})],
-                    ),
-                ]),
 
-                # Percentile Radar
-                html.Div(style=CARD_STYLE, className='dashboard-card', children=[
-                    html.Div('Driver Percentile Profile', style=SECTION_TITLE_STYLE),
-                    html.P('How does this driver rank vs. all drivers?', style={
-                        'fontSize': '11px', 'color': COLORS['text_muted'], 'marginBottom': '12px',
-                    }),
-                    html.Div(style={'width': '180px', 'marginBottom': '12px'}, children=[
-                        html.Label('Driver', style={
-                            'fontSize': '11px', 'color': COLORS['text_secondary'],
-                            'display': 'block', 'marginBottom': '5px', 'fontWeight': '600',
-                        }),
-                        dcc.Dropdown(
-                            id='percentile-driver-select',
-                            placeholder='Select driver...',
-                            style={'backgroundColor': COLORS['card_bg']},
+                    html.Div(style=CARD_STYLE, className='dashboard-card no-hover', children=[
+                        html.Div(style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'marginBottom': '15px'}, children=[
+                            html.Div(children=[
+                                html.Div('Performance Distributions', style=SECTION_TITLE_STYLE),
+                                html.P('Per-driver distribution of telemetry metrics (violin + box)', style={
+                                    'fontSize': '11px', 'color': COLORS['text_muted'], 'marginTop': '4px',
+                                }),
+                            ]),
+                            html.Div(style={'width': '200px'}, children=[
+                                html.Label('Metric', style={
+                                    'fontSize': '11px', 'color': COLORS['text_secondary'],
+                                    'display': 'block', 'marginBottom': '5px', 'fontWeight': '600',
+                                }),
+                                dcc.Dropdown(
+                                    id='distribution-column-select',
+                                    options=[{'label': c.replace('_', ' ').title(), 'value': c} for c in NUMERIC_TELEMETRY_COLS],
+                                    value='speed_kph',
+                                    clearable=False,
+                                    className=DROPDOWN_CLASSNAME,
+                                    style={'backgroundColor': COLORS['card_bg']},
+                                ),
+                            ]),
+                        ]),
+                        html.Div(
+                            className='chart-container', style={'height': '400px'},
+                            children=[dcc.Graph(id='distribution-chart', config={'displayModeBar': False})],
                         ),
                     ]),
-                    html.Div(
-                        className='chart-container', style={'height': '340px'},
-                        children=[dcc.Graph(id='percentile-radar', config={'displayModeBar': False})],
-                    ),
-                ]),
-            ]),
-        ]),
-    ]),
-])
 
+                    html.Div(style={'display': 'grid', 'gridTemplateColumns': '60% 40%', 'gap': '20px', 'marginBottom': '20px'}, children=[
+                        html.Div(style=CARD_STYLE, className='dashboard-card', children=[
+                            html.Div(style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'marginBottom': '15px'}, children=[
+                                html.Div(children=[
+                                    html.Div('Rolling Averages', style=SECTION_TITLE_STYLE),
+                                    html.P('Moving-window smoothing of telemetry traces', style={
+                                        'fontSize': '11px', 'color': COLORS['text_muted'], 'marginTop': '4px',
+                                    }),
+                                ]),
+                                html.Div(style={'width': '150px'}, children=[
+                                    html.Label('Window Size', style={
+                                        'fontSize': '11px', 'color': COLORS['text_secondary'],
+                                        'display': 'block', 'marginBottom': '5px', 'fontWeight': '600',
+                                    }),
+                                    dcc.Slider(
+                                        id='rolling-window-slider', min=5, max=50, step=5,
+                                        value=20, marks={5: '5', 20: '20', 50: '50'},
+                                        tooltip={'placement': 'bottom'},
+                                    ),
+                                ]),
+                            ]),
+                            html.Div(
+                                className='chart-container', style={'height': '380px'},
+                                children=[dcc.Graph(id='rolling-stats-chart', config={'displayModeBar': False})],
+                            ),
+                        ]),
+
+                        html.Div(style=CARD_STYLE, className='dashboard-card', children=[
+                            html.Div('Driver Percentile Profile', style=SECTION_TITLE_STYLE),
+                            html.P('How does this driver rank vs. all drivers?', style={
+                                'fontSize': '11px', 'color': COLORS['text_muted'], 'marginBottom': '12px',
+                            }),
+                            html.Div(style={'width': '180px', 'marginBottom': '12px'}, children=[
+                                html.Label('Driver', style={
+                                    'fontSize': '11px', 'color': COLORS['text_secondary'],
+                                    'display': 'block', 'marginBottom': '5px', 'fontWeight': '600',
+                                }),
+                                dcc.Dropdown(
+                                    id='percentile-driver-select',
+                                    className=DROPDOWN_CLASSNAME,
+                                    placeholder='Select driver...',
+                                    style={'backgroundColor': COLORS['card_bg']},
+                                ),
+                            ]),
+                            html.Div(
+                                className='chart-container', style={'height': '340px'},
+                                children=[dcc.Graph(id='percentile-radar', config={'displayModeBar': False})],
+                            ),
+                        ]),
+                    ]),
+                ]),
+            ]
+        ),
+    ]
+)
 
 # ============================================================================
 # CALLBACKS
@@ -1773,45 +1696,62 @@ def update_correlation_heatmap(stored_data):
         font={'color': COLORS['text_secondary'], 'size': 10},
         margin={'l': 60, 'r': 20, 't': 20, 'b': 60},
     )
+    try:
+        fig = go.Figure()
+        base_layout = dict(
+            template='plotly_dark',
+            paper_bgcolor=COLORS['card_bg'],
+            plot_bgcolor=COLORS['card_bg'],
+            font={'color': COLORS['text_secondary'], 'size': 10},
+            margin={'l': 60, 'r': 20, 't': 20, 'b': 60},
+        )
 
-    if not stored_data:
-        fig.update_layout(**base_layout)
+        if not stored_data:
+            fig.update_layout(**base_layout)
+            return fig
+
+        df = pd.read_json(io.StringIO(stored_data), orient='split')
+        corr = compute_correlation_matrix(df)
+        
+        # Replace NaN with 0 or drop them if they exist to prevent JSON serialization errors
+        corr = corr.fillna(0)
+
+        if corr.empty:
+            fig.update_layout(**base_layout)
+            return fig
+
+        # Readable labels
+        labels = [c.replace('_', ' ').title() for c in corr.columns]
+
+        fig = go.Figure(data=go.Heatmap(
+            z=corr.values.tolist(),
+            x=labels,
+            y=labels,
+            colorscale=[
+                [0.0, '#E10600'],   # F1 Red (Negative)
+                [0.2, '#8a1c19'],
+                [0.5, '#15151e'],   # Neutral (Dark)
+                [0.8, '#009081'],
+                [1.0, '#00D2BE'],   # F1 Cyan (Positive)
+            ],
+            zmin=-1, zmax=1,
+            text=np.round(corr.values, 2).tolist(),
+            texttemplate='%{text}',
+            textfont={'size': 11, 'color': '#ffffff', 'family': 'Fira Code, monospace'},
+            hovertemplate='<b>%{x}</b> vs <b>%{y}</b><br>Correlation: %{z:.3f}<extra></extra>',
+            xgap=1, ygap=1,  # Pro Max: Add distinct cell separation
+            colorbar=dict(
+                title='Correlation', titlefont={'size': 10}, titleside='right', thickness=10,
+                tickfont={'color': COLORS['text_secondary'], 'size': 9},
+                len=0.7, y=0.5, yanchor='middle',  # Pro Max:Centered and compact
+            ),
+        ))
+        fig.update_layout(**base_layout, height=370, title={'text': 'Pearson Correlation', 'font': {'size': 12}})
         return fig
-
-    df = pd.read_json(io.StringIO(stored_data), orient='split')
-    corr = compute_correlation_matrix(df)
-    if corr.empty:
-        fig.update_layout(**base_layout)
-        return fig
-
-    # Readable labels
-    labels = [c.replace('_', ' ').title() for c in corr.columns]
-
-    fig = go.Figure(data=go.Heatmap(
-        z=corr.values,
-        x=labels,
-        y=labels,
-        colorscale=[
-            [0.0, '#E10600'],   # F1 Red (Negative)
-            [0.2, '#8a1c19'],
-            [0.5, '#15151e'],   # Neutral (Dark)
-            [0.8, '#009081'],
-            [1.0, '#00D2BE'],   # F1 Cyan (Positive)
-        ],
-        zmin=-1, zmax=1,
-        text=corr.values.round(2),
-        texttemplate='%{text}',
-        textfont={'size': 11, 'color': '#ffffff', 'family': 'Fira Code, monospace'},
-        hovertemplate='<b>%{x}</b> vs <b>%{y}</b><br>Correlation: %{z:.3f}<extra></extra>',
-        xgap=1, ygap=1,  # Pro Max: Add distinct cell separation
-        colorbar=dict(
-            title='Correlation', titlefont={'size': 10}, titleside='right', thickness=10,
-            tickfont={'color': COLORS['text_secondary'], 'size': 9},
-            len=0.7, y=0.5, yanchor='middle',  # Pro Max:Centered and compact
-        ),
-    ))
-    fig.update_layout(**base_layout, height=370, title={'text': 'Pearson Correlation', 'font': {'size': 12}})
-    return fig
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise
 
 
 # 2. Consistency Metrics
@@ -2110,5 +2050,6 @@ def update_percentile_radar(stored_data, driver):
 
 if __name__ == '__main__':
     app.run(debug=True, host='127.0.0.1', port=8050)
+
 
 
